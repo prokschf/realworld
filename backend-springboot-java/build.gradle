@@ -53,11 +53,6 @@ jib {
             }
         }
     }
-    to {
-        tags = [
-            "273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr"
-        ]
-    }
     container {
         ports = ["8080"]
     }
