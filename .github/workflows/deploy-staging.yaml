@@ -18,7 +18,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       - name: Gradle Build
         run: |
-          ./gradlew build bootRun
+          ./gradlew build build
         working-directory: ./backend-springboot-java
           
 
