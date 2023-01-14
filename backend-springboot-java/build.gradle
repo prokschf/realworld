@@ -57,9 +57,6 @@ jib {
             }
         }
     }
-    to {
-        image = "ghcr.io/raeperd/${rootProject.name}"
-    }
     container {
         ports = ["8080"]
     }
