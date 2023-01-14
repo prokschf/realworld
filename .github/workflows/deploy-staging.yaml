@@ -49,7 +49,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build container image
-        run: ./gradlew jibDockerBuild -Djib.to.image=273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr -Djib.to.tags=273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr --info
+        run: ./gradlew jibDockerBuild -Djib.to.image=273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr --info
         working-directory: ./backend-springboot-java 
       -
         name: Build and push
