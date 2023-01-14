@@ -1,0 +1,20 @@
+name: Build Springboot Backend
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.4.3
+#        with:
+#          java-version: ${{ env.JAVA_VERSION }}
+      - name: Gradle Build
+        run: |
+          ./gradlew build bootRun
+          
+
