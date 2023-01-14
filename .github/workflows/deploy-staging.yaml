@@ -49,11 +49,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build container image
-        run: ./gradlew jib -Djib.to.tags=273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr:latest
+        run: ./gradlew jib -Djib.to.tags=273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr --debug
         working-directory: ./backend-springboot-java 
       -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: 273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr:latest
+          tags: 273711029273.dkr.ecr.eu-central-1.amazonaws.com/realworld-staging-backend-ecr
