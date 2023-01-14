@@ -31,6 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonarqube --info
+        working-directory: ./backend-springboot-java
       - uses: actions/upload-artifact@v2
         with:
           path: backend-springboot-java/build/libs/*.jar
