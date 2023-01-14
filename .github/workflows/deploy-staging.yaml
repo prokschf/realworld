@@ -19,5 +19,6 @@ jobs:
       - name: Gradle Build
         run: |
           ./gradlew build bootRun
+        working-directory: ./backend-springboot-java
           
 
