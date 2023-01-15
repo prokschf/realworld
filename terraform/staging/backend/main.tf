@@ -15,9 +15,11 @@ terraform {
   }
 }
 
+
 module "backend" {
   source       = "../../modules/backend"
   stage_name   = "staging"
   project_name = "realworld"
   VPC_cidr     = "10.40.0.0/16"
 }
+

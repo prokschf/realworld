@@ -16,6 +16,6 @@ resource "aws_ecr_repository" "backend-ecrs" {
   }
 }
 
-output "backend-ecrs" {
-  value       = values(aws_ecr_repository.backend-ecrs)[*].name
+output "backend-ecr-names" {
+  value       = {for ecr in aws_ecr_repository.backend-ecrs : "${ecr.tags["Stage"]}" => ecr.repository_url}
 }
