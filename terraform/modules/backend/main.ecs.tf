@@ -91,11 +91,18 @@ resource "aws_ecs_task_definition" "backend_task_def" {
   depends_on               = [aws_ecs_cluster.main]
 
 
-container_definitions = <<DEFINITION
+  container_definitions = <<DEFINITION
 [
   {
     "image": "${data.terraform_remote_state.init-deploy_infra.outputs.backend-ecr-names[var.stage_name]}:latest",
-    "name": "backend-container",
+    "name": "backend-${var.stage_name}-container",
+    "portMappings": [
+      {
+        "hostPort": 8080,
+        "protocol": "tcp",
+        "containerPort": 8080
+      }
+    ],
     "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -109,7 +116,6 @@ container_definitions = <<DEFINITION
 ]
 DEFINITION
 
-
   tags = {
     Project = var.project_name
     Stage   = var.stage_name
@@ -118,3 +124,31 @@ DEFINITION
   }
 }
 
+
+resource "aws_ecs_service" "main" {
+  name                               = "${var.project_name}-service-${var.stage_name}"
+  cluster                            = aws_ecs_cluster.main.id
+  task_definition                    = aws_ecs_task_definition.backend_task_def.arn
+  desired_count                      = 2
+  deployment_minimum_healthy_percent = 50
+  deployment_maximum_percent         = 200
+  launch_type                        = "FARGATE"
+  scheduling_strategy                = "REPLICA"
+  depends_on                         = [aws_ecs_task_definition.backend_task_def, aws_alb_target_group.main]
+
+  network_configuration {
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    subnets          = aws_subnet.private_subnet.*.id
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.main.arn
+    container_name   = "backend-${var.stage_name}-container"
+    container_port   = 8080
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition, desired_count]
+  }
+}
