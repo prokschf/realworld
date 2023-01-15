@@ -6,6 +6,14 @@ resource "aws_lb" "main" {
   subnets            = aws_subnet.private_subnet.*.id
  
   enable_deletion_protection = false
+
+  tags = {
+    Project = var.project_name
+    Stage   = var.stage_name
+    Tier    = "backend"
+    Name    = "BackendALB"
+  }
+
 }
  
 resource "aws_alb_target_group" "main" {
@@ -15,6 +23,13 @@ resource "aws_alb_target_group" "main" {
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
  
+   tags = {
+    Project = var.project_name
+    Stage   = var.stage_name
+    Tier    = "backend"
+    Name    = "BackendALBTargetGroup80"
+  }
+
 }
 
 resource "aws_alb_listener" "http" {
@@ -23,14 +38,17 @@ resource "aws_alb_listener" "http" {
   protocol          = "HTTP"
  
   default_action {
-   type = "redirect"
- 
-   /*redirect {
-     port        = 443
-     protocol    = "HTTPS"
-     status_code = "HTTP_301"
-   }*/
+   type = "forward" 
+   target_group_arn = aws_alb_target_group.main.arn
   }
+
+  tags = {
+    Project = var.project_name
+    Stage   = var.stage_name
+    Tier    = "backend"
+    Name    = "BackendALBListener80"
+  }
+
 }
 
 /* 
@@ -46,5 +64,13 @@ resource "aws_alb_listener" "https" {
     target_group_arn = aws_alb_target_group.main.id
     type             = "forward"
   }
+
+    tags = {
+    Project = var.project_name
+    Stage   = var.stage_name
+    Tier    = "backend"
+    Name    = "BackendALBListener443"
+  }
+
 }*/
 

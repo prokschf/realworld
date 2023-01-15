@@ -80,13 +80,25 @@ data "terraform_remote_state" "init-deploy_infra" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+resource "aws_cloudwatch_log_group" "example-production-client" {
+  name = "backend-container-logs"
+
+  tags = {
+    Environment = "production"
+  }
+}
+
 resource "aws_ecs_task_definition" "backend_task_def" {
   family                   = "${var.project_name}-${var.stage_name}-backend-task-def"
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  #task_role_arn            = aws_iam_role.ecs_task_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode             = "awsvpc"
-  cpu                      = "256"
-  memory                   = "1024"
+  cpu                      = "1024"
+  memory                   = "2048"
+  runtime_platform  {
+    cpu_architecture         = "X86_64"
+     operating_system_family  = "LINUX"
+  }
   requires_compatibilities = ["FARGATE"]
   depends_on               = [aws_ecs_cluster.main]
 
@@ -100,15 +112,17 @@ resource "aws_ecs_task_definition" "backend_task_def" {
       {
         "hostPort": 8080,
         "protocol": "tcp",
-        "containerPort": 8080
+        "containerPort": 8080,
+        "appProtocol": "http"
       }
     ],
     "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-region" : "${data.aws_region.current.name}",
+                    "awslogs-create-group": "true",
+                    "awslogs-region" : "eu-central-1",
                     "awslogs-group" : "backend-container-logs",
-                    "awslogs-stream-prefix" : "${var.project_name}-${var.stage_name}"
+                    "awslogs-stream-prefix" : "ecs"
                 }
             }
     }
@@ -129,7 +143,7 @@ resource "aws_ecs_service" "main" {
   name                               = "${var.project_name}-service-${var.stage_name}"
   cluster                            = aws_ecs_cluster.main.id
   task_definition                    = aws_ecs_task_definition.backend_task_def.arn
-  desired_count                      = 2
+  desired_count                      = 1
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
   launch_type                        = "FARGATE"
@@ -138,8 +152,8 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = aws_subnet.private_subnet.*.id
-    assign_public_ip = false
+    subnets          = aws_subnet.public_subnet.*.id
+    assign_public_ip = true
   }
 
   load_balancer {
@@ -148,7 +162,7 @@ resource "aws_ecs_service" "main" {
     container_port   = 8080
   }
 
-  lifecycle {
-    ignore_changes = [task_definition, desired_count]
-  }
+  #lifecycle {
+  #  ignore_changes = [task_definition, desired_count]
+  #}
 }
